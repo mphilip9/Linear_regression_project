@@ -140,6 +140,34 @@ coef(summary(sat.voting.mod))
 ## Interactions and factors
 ## ══════════════════════════
 
+  #1. Examining and plotting the data
+plot(states.data$metro, states.data$energy)
+  #2. Interpreting the model and summary
+energy.mod <- lm(energy ~ metro, data = na.omit(states.data))
+summary(energy.mod) #Looking at the significance codes for the model, the probability that a coefficient is actually 0 is unlikely and the
+                        #variable metro is probably significant
+  #3 Plotting the model
+plot(energy.mod)
+
+  #Adding more predictors the the model
+#1 Plotting
+plot(states.data$density, states.data$energy) #Doesn't seem very conclusive
+plot(states.data$toxic, states.data$energy) #Energy consumption appears to trend up with toxics released
+plot(states.data$college, states.data$energy) #Energy consumption appears to trend down with college %
+#2 Interpreting model and summary
+energy.mod2 <- lm(energy ~ metro + density + toxic + college, data = na.omit(states.data))
+summary(energy.mod2) #Only toxic appears to be significant, could be due to multicolinearity. Let's try again
+energy.mod3 <- lm(energy ~ metro + toxic + college, data = na.omit(states.data))
+summary(energy.mod3)
+energy.mod4 <- lm(energy ~ toxic, data = na.omit(states.data))
+# After summarizing the model with all four variables, it appears toxic has far greater correlation with energy than the other predictors
+# 3 Plotting the model
+plot(energy.mod2)#It could be that a few outliers are skewing the data (perhaps due to the limited data set)
+plot(energy.mod4)# Notice the outliers here as well
+
+#This new model does appear to be significantly better, as the residual standard error is lower and the r-squared value significantly higher.
+anova(energy.mod, energy.mod2) #Notice the p value is < .001, meaning the second model is a significantly improved fit over the first model
+
 ## Modeling interactions
 ## ─────────────────────────
 
@@ -200,6 +228,15 @@ coef(summary(lm(csat ~ C(region, contr.helmert),
 
 ##   1. Add on to the regression equation that you created in exercise 1 by
 ##      generating an interaction term and testing the interaction.
-
+energy.toxic.by.green <- lm(energy ~ toxic*green, data = na.omit(states.data))
+summary(energy.toxic.by.green)
+coef(summary(energy.toxic.by.green))
+  #Green appears to have a significant impact on the association of toxic with energy
 ##   2. Try adding region to the model. Are there significant differences
 ##      across the four regions?
+energy.toxic.by.green2 <- lm(energy ~ toxic*green + region, data = na.omit(states.data))
+summary(energy.toxic.by.green2)
+energy.toxic.region <- lm(energy ~ toxic + region, data = na.omit(states.data))
+summary(energy.toxic.region)
+coef(summary(energy.toxic.by.green2))
+#The southern region seems to have a more significant impact on the model than the other two
